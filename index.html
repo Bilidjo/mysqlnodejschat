@@ -19,7 +19,7 @@
                         now.name = $('#login').val();
                         now.pwd = $('#password').val();
                         now.ready(function(){
-                            $('#loginbox').fadeOut();
+                            
                             // On signal l'arrivé d'un nouveau client
                             now.newClient(now.name,now.pwd);
                         });
@@ -84,21 +84,29 @@
                     $("#clientname").html('Hi '+myLogin+' - Online friends ('+c+')').css('display','block');
                     if(c == 0) $('#clientList').append("<li class='alone'>Mmh... You're alone !</li>");
                 }
+                now.wrongId = function(){
+                    $("#loginerror").html('Wrong id !').css('display','block');
+                }
+                now.goodId = function(){
+                    $('#loginbox').fadeOut();
+                }
+                
             });
         </script>
     </head>
     <body>
         <div id="about"> <a target="_blank" href="http://adrienbaptiste.com/">Baptiste Adrien</a> / <a href="http://www.adrienbaptiste.com/2012/02/creer-un-chat-facebook-avec-nodejs-nowjs/">Tutorial Facebook Chat Like with NodeJS</a> / <a target="_blank" href="https://github.com/shinework/nodejschat">Sources</a> <div id="twitter"><a href="https://twitter.com/share" class="twitter-share-button" data-url="http://www.adrienbaptiste.com/chat3d/chatfb.html" data-text="Facebook Chat Like with #nodeJS and #nowJS" data-via="shinework" data-lang="fr">Tweeter</a></div></div>
         <div id="loginbox">
-            Hi guy ! What's your name ?</br>
-            <input type="text" id="login"/><input type="password" id="password"/><input type="button" value="Go" id="launch">
-        </div>
-        <div id="nav-right">
-            <div id="clientname"></div>
-            <ul id="clientList">
-            </ul>
-        </div>
-        <div id="chatList">
-        </div>
-    </body>
-</html>
+                <img src="img/relation.png">
+                <input type="text" id="login"/><input type="password" id="password"/><input type="button" value="Go" id="launch">
+                    <div id="loginerror"></div>
+                    </div>
+                    <div id="nav-right">
+                        <div id="clientname"></div>
+                        <ul id="clientList">
+                        </ul>
+                    </div>
+                    <div id="chatList">
+                    </div>
+                    </body>
+                    </html>

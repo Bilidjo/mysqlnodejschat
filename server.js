@@ -14,18 +14,16 @@ shasum.update("utf8");
 new mysql.Database({
     hostname: 'localhost',
     user: 'root',
-    password: 'yourpassword',
+    password: 'password',
     database: 'nodejschat'
 }).connect(function(error) {
     if (error) {
         return console.log('CONNECTION error: ' + error);
     }
-    /* */
     var db = this;
     var everyone = nowjs.initialize(server);
     var clients = {}; // Attention ne pas initialiser avec [] car bug lors de la transmission de la variable au client
     everyone.now.newClient = function(name, pwd){
-        
         var context = this;
         // Chiffrage du pass en sha1
         var hash = crypto.createHash('sha1').update(pwd).digest("hex");
@@ -37,7 +35,7 @@ new mysql.Database({
                 return;
             }
             if(rows.length == 1){ // Le compte existe
-                //On ajoute le client au tableau en renseignant son pseudo et son statut (connecté ou non)
+                //On ajoute le client au tableau des connectés
                 clients[context.user.clientId] =  {
                     login: name, 
                     statut: 1,
@@ -45,44 +43,48 @@ new mysql.Database({
                     avatar: rows[0].avatar,
                     friends: new Array
                 };
+                // On signal au client qu'on est bien connecté
+                nowjs.getClient(context.user.clientId, function(err) {
+                    this.now.goodId();
+                });
+                // On récupère les id de ses amis
                 db.query('SELECT m.id,m.name FROM friends a LEFT JOIN users m ON m.id=IF(friend_1='+rows[0].id+',a.friend_2,a.friend_1) WHERE friend_1='+rows[0].id+' OR friend_2='+rows[0].id).
                 execute(function(error, rows, cols) {
-                    // On met à jour la liste des connectés
-                    //console.log('nb amis : ' + rows.length);
-                    //for(var r in rows) {
+                    // On enregistre dans un tableau
                     var friendList = new Array;
                     for(var i= 0; i < rows.length; i++)
                     {
                         friendList.push(rows[i].id);
                     }
-                    clients[context.user.clientId].friends = friendList;
+                    clients[context.user.clientId].friends = friendList; // Ajout aux propriétés de l'user
                     for(var c in clients) {
-                        // Ce client est mon ami
+                        // Ce client est mon ami ou bien c'est moi même
                         if(friendList.inArray(clients[c].userid) || clients[c].userid == clients[context.user.clientId].userid){
                             nowjs.getClient(c, function(err) {
-                                //Je lui raffraichie sa liste
+                                //Rafraichissement de sa liste
                                 this.now.updateClientList(getConnectedFriends(c),clients[c].login);
                             });
                         }
                     }
                 });
                 
-            } else { // Pas d'erreur
-                console.log('Mauvais id !');
+            } else { // Mauvais identifiants
+                nowjs.getClient(context.user.clientId, function(err) {
+                    // Affichage d'un message d'erreur coté client
+                    this.now.wrongId();
+                });
             }
         });
         
     };
     
     function getConnectedFriends(idClient){
-        
         var updatedList = {};
         var myFriends = clients[idClient].friends;
         for(var c in clients) {
             if(myFriends.inArray(clients[c].userid)){
                 updatedList[c] = clients[c];
             }
-         
         }
         return updatedList;
     }
@@ -104,19 +106,23 @@ new mysql.Database({
     };
 
     nowjs.on('disconnect', function() {
-        var friendList = clients[this.user.clientId].friends;
-        for(var i in clients) {
-            if(i == this.user.clientId) {
-                delete clients[i];
-                break;
+        // Le client est bien logué
+        if(clients[this.user.clientId] != null){
+            var friendList = clients[this.user.clientId].friends;
+            for(var i in clients) {
+                if(i == this.user.clientId) {
+                    delete clients[i];
+                    break;
+                }
             }
-        }
-        for(var c in clients) {
-            if(friendList.inArray(clients[c].userid)){
-                nowjs.getClient(c, function(err) {
-                    //Je lui raffraichie sa liste
-                    this.now.updateClientList(getConnectedFriends(c),clients[c].login);
-                });
+            // On signal à tous ses amis qu'il s'est déconnecté
+            for(var c in clients) {
+                if(friendList.inArray(clients[c].userid)){
+                    nowjs.getClient(c, function(err) {
+                        // Rafraichissement des listes
+                        this.now.updateClientList(getConnectedFriends(c),clients[c].login);
+                    });
+                }
             }
         }
     });

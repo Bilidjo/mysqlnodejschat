@@ -171,18 +171,19 @@ ul#clientList {
     font-family: 'Droid Sans Mono', sans-serif;
     position:absolute;
     z-index:500;
-    height:100px;
-    width:200px;
+    height:200px;
+    width:270px;
     left: 50%;
     top: 50%;
     color: white;
-    margin-left: -100px;
-    margin-top: -50px;
+    margin-left: -135px;
+    margin-top: -100px;
 }
-#loginbox input[type=text]{
-    margin-top: 10px;
+#loginbox input[type=text],#loginbox input[type=password]{
+    margin-top: 6px;
     padding: 4px;
-    width: 80px;
+    width: 100px;
+    margin-right: 3px;
 }
 #chat input[type=button],#loginbox input[type=button]{
     font-family: 'Droid Sans Mono', sans-serif;
@@ -200,4 +201,12 @@ ul#clientList {
 #chat input[type=button]:hover,#loginbox input[type=button]:hover{
     background-image:url(img/btn.jpg);
     background-position: bottom;
+}
+#loginerror{
+    margin-top: 4px;
+    font-size: 13px;
+    padding: 2px;
+    color:white;
+    font-weight: bold;
+    display: none;
 }
