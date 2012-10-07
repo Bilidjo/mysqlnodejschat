@@ -1,0 +1,104 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <title>Facebook Chat Like in NodeJS</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.1/jquery.min.js"></script> 
+        <script src="http://adrienbaptiste.com:9863/nowjs/now.js"></script>
+        <link rel='stylesheet' href='style.css' type='text/css' media='screen' />
+        <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+        <script>
+            $(document).ready(function(){
+
+                $('#launch').click(function() {
+                    startApp();
+                });
+
+                function startApp(){
+                    if($('#login').val() != "" && $('#password').val() != ""){
+                        now.name = $('#login').val();
+                        now.pwd = $('#password').val();
+                        now.ready(function(){
+                            $('#loginbox').fadeOut();
+                            // On signal l'arrivé d'un nouveau client
+                            now.newClient(now.name,now.pwd);
+                        });
+                    }
+                }
+
+                // Demande d'ouverture d'un chat avec la personne
+                $('#clientList a').live('click',function(){
+                    var idClient = $(this).attr('id');
+                    // L'id du chat est égal à la somme des id des deux clients
+                    var idChat = (idClient)+(now.core.clientId);
+                    if ($('#'+idChat).length == 0){
+                        now.openChat(idClient);
+                    } else {
+                        $('#'+idChat).css('display','block');
+                    }
+                });
+
+                // Ajout du chat dans l'interface
+                now.addChat = function(idChat,idRecever,recever,sender){
+                    var login;
+                    if(idRecever == now.core.clientId) login = sender;
+                    else login = recever;
+                    $('#chatList').append('<div class="popup-chat" id="'+idChat+'"><div class="popup-chat-header">'+login+' <a href="#null" rel="'+idChat+'"><img src="img/close.gif" alt="" /></a></div><div class="popup-chat-talk"></div><div class="popup-chat-input"><input name="'+idChat+'" id="msg-'+idChat+'" type="text" /></div></div></div>');
+                    $('#msg-'+idChat).focus();
+                }
+
+                // Lorsque l'on presse entrée on envoie le message
+                $(document).keypress(function(e) {
+                    if(e.keyCode == 13) {
+                        var id = e.target.name;
+                        if($('#msg-'+id).val() != ''){
+                            var msg = $('#msg-'+id).val();
+                            $('#msg-'+id).val('');
+                            now.sendMessage(msg,id);
+                        }
+                    }
+                });
+
+                // Affichage des messages reçus
+                now.displayMessage = function(idChat, message, avatar){
+                    $('#'+idChat).css('display','block');
+                    $('#'+idChat+' .popup-chat-talk').append('<div class="user-msg"><div class="user-avatar"><img src="img/'+avatar+'" width="32" height="32"></div><div class="user-text">'+message+'</div></div>');
+                }
+
+                // Masquer un chat
+                $('.popup-chat-header a').live('click',function(){
+                    var idChat = $(this).attr('rel');
+                    $('#'+idChat).css('display','none');
+                });
+
+                // Fonction mettant à jour la liste des connectés
+                now.updateClientList = function(clients,myLogin){
+                    var c=0;
+                    $("#clientList").html('');
+                    for(var i in clients) {
+                        if(i != now.core.clientId) {
+                            c++;
+                            $('#clientList').append('<a id="'+i+'" href="#null"><li><img alt="'+clients[i].login +'" src="img/'+clients[i].avatar+'" width="28" height="28"><div>'+clients[i].login +'</div></li></a>');
+                        }
+                    }
+                    $("#clientname").html('Hi '+myLogin+' - Online friends ('+c+')').css('display','block');
+                    if(c == 0) $('#clientList').append("<li class='alone'>Mmh... You're alone !</li>");
+                }
+            });
+        </script>
+    </head>
+    <body>
+        <div id="about"> <a target="_blank" href="http://adrienbaptiste.com/">Baptiste Adrien</a> / <a href="http://www.adrienbaptiste.com/2012/02/creer-un-chat-facebook-avec-nodejs-nowjs/">Tutorial Facebook Chat Like with NodeJS</a> / <a target="_blank" href="https://github.com/shinework/nodejschat">Sources</a> <div id="twitter"><a href="https://twitter.com/share" class="twitter-share-button" data-url="http://www.adrienbaptiste.com/chat3d/chatfb.html" data-text="Facebook Chat Like with #nodeJS and #nowJS" data-via="shinework" data-lang="fr">Tweeter</a></div></div>
+        <div id="loginbox">
+            Hi guy ! What's your name ?</br>
+            <input type="text" id="login"/><input type="password" id="password"/><input type="button" value="Go" id="launch">
+        </div>
+        <div id="nav-right">
+            <div id="clientname"></div>
+            <ul id="clientList">
+            </ul>
+        </div>
+        <div id="chatList">
+        </div>
+    </body>
+</html>
