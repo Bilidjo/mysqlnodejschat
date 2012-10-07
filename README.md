@@ -1,6 +1,7 @@
-mysql nodejs chat with friends list support
-=============
+## Mysql nodejs chat with friends list support
 Online demo is available on http://www.adrienbaptiste.com/chatfbmysql/
+
+You need to install the db-mysq module http://nodejsdb.org/db-mysql/ for using this chat
 
 ## SQL data and structure
 
