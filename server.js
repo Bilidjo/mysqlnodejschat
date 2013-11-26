@@ -1,10 +1,10 @@
-var html = require('fs').readFileSync(__dirname+'/www/chatfbmysql/index.html');
+var html = require('fs').readFileSync(__dirname+'/index.html');
 var server = require('http').createServer(function(req, res){
     res.end(html);
 });
 server.listen(9863);
 
-var mysql = require('db-mysql');
+var mysql = require('mysql');
 var nowjs = require('now');
 var crypto = require('crypto')
 var shasum = crypto.createHash('sha1');
